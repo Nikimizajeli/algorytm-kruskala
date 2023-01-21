@@ -189,18 +189,29 @@ public:
 
 TablicaDynamiczna<Krawedz> algorytmKruskala(Graf graf, bool unionByRank, bool pathCompression) {
     UnionFind unionFind = UnionFind(graf.pobierzIloscWezlow());
+
+    clock_t czasStartuSortowania = clock();
     graf.sortujKrawedzie();
+    clock_t czasKoncaSortowania = clock();
+    long czasSortowaniaMs = (czasKoncaSortowania - czasStartuSortowania) / (CLOCKS_PER_SEC / 1000);
+    std::cout << "Sortowanie zajelo:  " << czasSortowaniaMs << "ms.\n";
 
     TablicaDynamiczna<Krawedz> wynikowyPodzbiorKrawedzi = TablicaDynamiczna<Krawedz>();
+    int licznikWyszukan = 0;
+    clock_t czasStartuGlownejPetli = clock();
     for (int i = 0; i < graf.pobierzIloscKrawedzi(); i++) {
         int reprezentantWezlaA;
         int reprezentantWezlaB;
         if (pathCompression) {
             reprezentantWezlaA = unionFind.znajdzReprezentantaPathCompression(graf.pobierzKrawedz(i).indeksA);
+            licznikWyszukan++;
             reprezentantWezlaB = unionFind.znajdzReprezentantaPathCompression(graf.pobierzKrawedz(i).indeksB);
+            licznikWyszukan++;
         } else {
             reprezentantWezlaA = unionFind.znajdzReprezentanta(graf.pobierzKrawedz(i).indeksA);
+            licznikWyszukan++;
             reprezentantWezlaB = unionFind.znajdzReprezentanta(graf.pobierzKrawedz(i).indeksB);
+            licznikWyszukan++;
         }
 
         if (reprezentantWezlaA != reprezentantWezlaB) {
@@ -212,6 +223,11 @@ TablicaDynamiczna<Krawedz> algorytmKruskala(Graf graf, bool unionByRank, bool pa
             }
         }
     }
+    clock_t czasKoncaGlownejPetli = clock();
+    long czasObliczenGlownejPetli = (czasKoncaGlownejPetli - czasStartuGlownejPetli) / (CLOCKS_PER_SEC / 1000);
+    std::cout << "Glowna petla w algorytmie Kruskala zajela: " << czasObliczenGlownejPetli << "ms.\n";
+
+    std::cout << "Liczba wykonan operacji find: " << licznikWyszukan << '\n';
 
     return wynikowyPodzbiorKrawedzi;
 }
@@ -242,7 +258,28 @@ void testLadowaniaGrafuZPliku() {
 
 }
 
+void eksperyment() {
+    std::string nazwyPlikow[3] = {"g1.txt", "g2.txt", "g3.txt"};
+
+    for (const auto & nazwaPliku : nazwyPlikow) {
+        std::cout << "--------------------------------------\nGraf: " << nazwaPliku
+                  << "\n--------------------------------------\n";
+
+        Graf graf = Graf(nazwaPliku);
+        TablicaDynamiczna<Krawedz> wynik = algorytmKruskala(graf, true, true);
+        std::cout << "Liczba krawedzi: " << wynik.pobierzIloscElementow() << '\n';
+        float sumaWag = 0.0f;
+        for (int j = 0; j < wynik.pobierzIloscElementow(); j++) {
+            sumaWag += wynik[j].koszt;
+        }
+        std::cout << "Suma wag: " << sumaWag << '\n';
+
+    }
+
+}
+
 int main() {
+    eksperyment();
 //    testMergeSort();
 //    testLadowaniaGrafuZPliku();
 

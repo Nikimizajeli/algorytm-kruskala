@@ -79,11 +79,6 @@ public:
     TablicaDynamiczna() : tablica(new T[POCZATKOWY_ROZMIAR]), iloscElementow(0), rozmiarTablicy(POCZATKOWY_ROZMIAR) {
     }
 
-    ~TablicaDynamiczna() {
-        delete[] tablica;
-        tablica = nullptr;
-    }
-
     // a) dodanie nowego elementu na koncu tablicy
     void dodajElement(const T &dane) {
         if (iloscElementow >= rozmiarTablicy) {
