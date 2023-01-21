@@ -44,7 +44,7 @@ private:
                 std::string y;
                 std::getline(plik, x, ' ');
                 std::getline(plik, y);
-                wezly.dodajElement(Wezel(std::stof(x), std::stof(y)));
+                dodajWezel(Wezel(std::stof(x), std::stof(y)));
             }
 
             std::getline(plik, linia);
@@ -56,7 +56,7 @@ private:
                 std::getline(plik, a, ' ');
                 std::getline(plik, b, ' ');
                 std::getline(plik, koszt);
-                krawedzie.dodajElement(Krawedz(std::stoi(a), std::stoi(b), std::stof(koszt)));
+                dodajKrawedz(Krawedz(std::stoi(a), std::stoi(b), std::stof(koszt)));
             }
 
             plik.close();
@@ -81,6 +81,13 @@ public:
         krawedzie.dodajElement(krawedz);
     }
 
+    void sortujKrawedzie() {
+        auto komparatorWag = [](const Krawedz &lewa, const Krawedz &prawa) {
+            return lewa.koszt <= prawa.koszt;
+        };
+        krawedzie.sortujMerge(komparatorWag);
+    }
+
     Wezel pobierzWezel(int indeks) {
         if (indeks < 0 || indeks > wezly.pobierzIloscElementow()) {
             throw std::invalid_argument("Wezel poza zakresem.");
@@ -95,6 +102,14 @@ public:
         }
 
         return krawedzie.zwrocDane(indeks);
+    }
+
+    int pobierzIloscWezlow() {
+        return wezly.pobierzIloscElementow();
+    }
+
+    int pobierzIloscKrawedzi() {
+        return krawedzie.pobierzIloscElementow();
     }
 
 };
@@ -172,6 +187,35 @@ public:
     }
 };
 
+TablicaDynamiczna<Krawedz> algorytmKruskala(Graf graf, bool unionByRank, bool pathCompression) {
+    UnionFind unionFind = UnionFind(graf.pobierzIloscWezlow());
+    graf.sortujKrawedzie();
+
+    TablicaDynamiczna<Krawedz> wynikowyPodzbiorKrawedzi = TablicaDynamiczna<Krawedz>();
+    for (int i = 0; i < graf.pobierzIloscKrawedzi(); i++) {
+        int reprezentantWezlaA;
+        int reprezentantWezlaB;
+        if (pathCompression) {
+            reprezentantWezlaA = unionFind.znajdzReprezentantaPathCompression(graf.pobierzKrawedz(i).indeksA);
+            reprezentantWezlaB = unionFind.znajdzReprezentantaPathCompression(graf.pobierzKrawedz(i).indeksB);
+        } else {
+            reprezentantWezlaA = unionFind.znajdzReprezentanta(graf.pobierzKrawedz(i).indeksA);
+            reprezentantWezlaB = unionFind.znajdzReprezentanta(graf.pobierzKrawedz(i).indeksB);
+        }
+
+        if (reprezentantWezlaA != reprezentantWezlaB) {
+            wynikowyPodzbiorKrawedzi.dodajElement(graf.pobierzKrawedz(i));
+            if (unionByRank) {
+                unionFind.scalZbioryUnionByRank(reprezentantWezlaA, reprezentantWezlaB);
+            } else {
+                unionFind.scalZbiory(reprezentantWezlaA, reprezentantWezlaB);
+            }
+        }
+    }
+
+    return wynikowyPodzbiorKrawedzi;
+}
+
 void testMergeSort() {
     TablicaDynamiczna<int> tablica = TablicaDynamiczna<int>();
     for (int i = 9; i > 0; i = i - 2) {
@@ -200,7 +244,7 @@ void testLadowaniaGrafuZPliku() {
 
 int main() {
 //    testMergeSort();
-    testLadowaniaGrafuZPliku();
+//    testLadowaniaGrafuZPliku();
 
 
     return 0;

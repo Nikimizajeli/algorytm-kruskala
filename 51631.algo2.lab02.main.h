@@ -23,8 +23,8 @@ private:
         int rozmiarLewej = srodekTablicy - poczatekTablicy + 1;
         int rozmiarPrawej = koniecTablicy - srodekTablicy;
 
-        T *lewaTablica = new int[rozmiarLewej];
-        T *prawaTablica = new int[rozmiarPrawej];
+        T *lewaTablica = new T[rozmiarLewej];
+        T *prawaTablica = new T[rozmiarPrawej];
 
         for (int i = 0; i < rozmiarLewej; i++) {
             lewaTablica[i] = tablica[poczatekTablicy + i];
