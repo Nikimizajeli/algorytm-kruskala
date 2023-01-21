@@ -119,7 +119,24 @@ public:
     }
 };
 
+void testMergeSort() {
+    TablicaDynamiczna<int> tablica = TablicaDynamiczna<int>();
+    for (int i = 9; i > 0; i = i - 2) {
+        tablica.dodajElement(i);
+    }
+    for (int i = 0; i < 10; i = i + 2) {
+        tablica.dodajElement(i);
+    }
+    auto wyswietlInt = [](const int &i) { std::cout << i; };
+    tablica.wyswietlInfo(10, wyswietlInt);
+    auto komparatorInt = [](const int &lewy, const int &prawy) { return lewy <= prawy; };
+    tablica.sortujMerge(komparatorInt);
+    tablica.wyswietlInfo(10, wyswietlInt);
+}
+
 int main() {
+    testMergeSort();
 
     return 0;
 }
+

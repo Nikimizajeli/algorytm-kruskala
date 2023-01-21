@@ -18,6 +18,63 @@ private:
     int iloscElementow;
     int rozmiarTablicy;
 
+    void merge(const int poczatekTablicy, const int srodekTablicy, const int koniecTablicy,
+               bool (*komparator)(const T &, const T &)) {
+        int rozmiarLewej = srodekTablicy - poczatekTablicy + 1;
+        int rozmiarPrawej = koniecTablicy - srodekTablicy;
+
+        T *lewaTablica = new int[rozmiarLewej];
+        T *prawaTablica = new int[rozmiarPrawej];
+
+        for (int i = 0; i < rozmiarLewej; i++) {
+            lewaTablica[i] = tablica[poczatekTablicy + i];
+        }
+        for (int i = 0; i < rozmiarPrawej; i++) {
+            prawaTablica[i] = tablica[srodekTablicy + i + 1];
+        }
+
+        int indeksLewej = 0;
+        int indeksPrawej = 0;
+        int indeksGlownej = poczatekTablicy;
+
+        while (indeksLewej < rozmiarLewej && indeksPrawej < rozmiarPrawej) {
+            if (komparator(lewaTablica[indeksLewej], prawaTablica[indeksPrawej])) {
+                tablica[indeksGlownej] = lewaTablica[indeksLewej];
+                indeksLewej++;
+            } else {
+                tablica[indeksGlownej] = prawaTablica[indeksPrawej];
+                indeksPrawej++;
+            }
+            indeksGlownej++;
+        }
+
+        while (indeksLewej < rozmiarLewej) {
+            tablica[indeksGlownej] = lewaTablica[indeksLewej];
+            indeksGlownej++;
+            indeksLewej++;
+        }
+
+        while (indeksPrawej < rozmiarPrawej) {
+            tablica[indeksGlownej] = prawaTablica[indeksPrawej];
+            indeksGlownej++;
+            indeksPrawej++;
+        }
+
+        delete[] lewaTablica;
+        delete[] prawaTablica;
+    }
+
+    void mergeSort(int poczatekPodtablicy, int koniecPodtablicy, bool (*komparator)(const T &, const T &)) {
+        if (poczatekPodtablicy >= koniecPodtablicy) {
+            return;
+        }
+
+        int srodekPodtablicy = poczatekPodtablicy + (koniecPodtablicy - poczatekPodtablicy) / 2;
+        mergeSort(poczatekPodtablicy, srodekPodtablicy, komparator);
+        mergeSort(srodekPodtablicy + 1, koniecPodtablicy, komparator);
+        merge(poczatekPodtablicy, srodekPodtablicy, koniecPodtablicy, komparator);
+    }
+
 public:
     TablicaDynamiczna() : tablica(new T[POCZATKOWY_ROZMIAR]), iloscElementow(0), rozmiarTablicy(POCZATKOWY_ROZMIAR) {
     }
@@ -116,6 +173,11 @@ public:
                 }
             }
         }
+    }
+
+    // komparator true jak lewy <= prawy
+    void sortujMerge(bool (*komparator)(const T &, const T &)) {
+        mergeSort(0, iloscElementow - 1, komparator);
     }
 
     int pobierzIloscElementow() {
