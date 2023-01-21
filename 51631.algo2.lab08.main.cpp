@@ -3,6 +3,7 @@
 // sl51631@zut.edu.pl
 
 #include "51631.algo2.lab02.main.h"
+#include <fstream>
 
 struct Wezel {
     float x;
@@ -32,8 +33,44 @@ private:
     TablicaDynamiczna<Wezel> wezly;
     TablicaDynamiczna<Krawedz> krawedzie;
 
+    void zaladujGrafZPliku(const std::string &nazwaPliku) {
+        std::ifstream plik(nazwaPliku);
+        if (plik.is_open()) {
+            std::string linia;
+            std::getline(plik, linia);
+            int liczbaWezlow = std::stoi(linia);
+            for (int i = 0; i < liczbaWezlow; i++) {
+                std::string x;
+                std::string y;
+                std::getline(plik, x, ' ');
+                std::getline(plik, y);
+                wezly.dodajElement(Wezel(std::stof(x), std::stof(y)));
+            }
+
+            std::getline(plik, linia);
+            int liczbaKrawedzi = std::stoi(linia);
+            for (int i = 0; i < liczbaKrawedzi; i++) {
+                std::string a;
+                std::string b;
+                std::string koszt;
+                std::getline(plik, a, ' ');
+                std::getline(plik, b, ' ');
+                std::getline(plik, koszt);
+                krawedzie.dodajElement(Krawedz(std::stoi(a), std::stoi(b), std::stof(koszt)));
+            }
+
+            plik.close();
+        } else {
+            std::cerr << "Nie mozna otworzyc pliku";
+        }
+    }
+
 public:
     Graf() : wezly(TablicaDynamiczna<Wezel>()), krawedzie(TablicaDynamiczna<Krawedz>()) {
+    }
+
+    explicit Graf(const std::string &nazwaPliku) : Graf() {
+        zaladujGrafZPliku(nazwaPliku);
     }
 
     void dodajWezel(Wezel wezel) {
@@ -42,6 +79,22 @@ public:
 
     void dodajKrawedz(Krawedz krawedz) {
         krawedzie.dodajElement(krawedz);
+    }
+
+    Wezel pobierzWezel(int indeks) {
+        if (indeks < 0 || indeks > wezly.pobierzIloscElementow()) {
+            throw std::invalid_argument("Wezel poza zakresem.");
+        }
+
+        return wezly.zwrocDane(indeks);
+    }
+
+    Krawedz pobierzKrawedz(int indeks) {
+        if (indeks < 0 || indeks > krawedzie.pobierzIloscElementow()) {
+            throw std::invalid_argument("Wezel poza zakresem.");
+        }
+
+        return krawedzie.zwrocDane(indeks);
     }
 
 };
@@ -134,8 +187,21 @@ void testMergeSort() {
     tablica.wyswietlInfo(10, wyswietlInt);
 }
 
+void testLadowaniaGrafuZPliku() {
+    Graf graf = Graf("g1.txt");
+    std::cout << "Pierwszy wezel : " << graf.pobierzWezel(0).x << ' ' << graf.pobierzWezel(0).y << '\n';
+    std::cout << "Ostatni wezel : " << graf.pobierzWezel(19).x << ' ' << graf.pobierzWezel(19).y << '\n';
+    std::cout << "Pierwsza krawedz : " << graf.pobierzKrawedz(0).indeksA << ' ' << graf.pobierzKrawedz(0).indeksB
+              << ' ' << graf.pobierzKrawedz(0).koszt << '\n';
+    std::cout << "Ostatnia krawedz : " << graf.pobierzKrawedz(64).indeksA << ' ' << graf.pobierzKrawedz(64).indeksB
+              << ' ' << graf.pobierzKrawedz(64).koszt << '\n';
+
+}
+
 int main() {
-    testMergeSort();
+//    testMergeSort();
+    testLadowaniaGrafuZPliku();
+
 
     return 0;
 }
