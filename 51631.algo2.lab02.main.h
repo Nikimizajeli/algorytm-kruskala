@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <random>
+#include <algorithm>
 
 template<typename T>
 class TablicaDynamiczna {
@@ -77,6 +78,17 @@ private:
 
 public:
     TablicaDynamiczna() : tablica(new T[POCZATKOWY_ROZMIAR]), iloscElementow(0), rozmiarTablicy(POCZATKOWY_ROZMIAR) {
+    }
+
+    TablicaDynamiczna(const TablicaDynamiczna &tablica) : tablica(new T[tablica.rozmiarTablicy]),
+                                                          iloscElementow(tablica.iloscElementow),
+                                                          rozmiarTablicy(tablica.rozmiarTablicy) {
+        std::copy_n(tablica.tablica, iloscElementow, this->tablica);
+    }
+
+    ~TablicaDynamiczna() {
+        delete[] tablica;
+        tablica = nullptr;
     }
 
     // a) dodanie nowego elementu na koncu tablicy

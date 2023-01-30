@@ -168,17 +168,21 @@ public:
         }
     }
 
+    int licznikWyszukan = 0;
+
     // c) znajdowanie reprezentanta zbioru, arg indeks wezla, wynik indeks reprezentanta
     // dwa sposoby - bez i z kompresja sciezki
     int znajdzReprezentanta(int indeks) {
         while (indeks != rodzic(indeks)) {
+            licznikWyszukan++;
             indeks = rodzic(indeks);
         }
-
+        licznikWyszukan++;
         return indeks;
     }
 
     int znajdzReprezentantaPathCompression(int indeks) {
+        licznikWyszukan++;
         if (indeks != rodzic(indeks)) {
             indeksyRodzicow[indeks] = znajdzReprezentantaPathCompression(rodzic(indeks));
         }
@@ -197,21 +201,16 @@ TablicaDynamiczna<Krawedz> algorytmKruskala(Graf graf, bool unionByRank, bool pa
     std::cout << "Sortowanie zajelo:  " << czasSortowaniaMs << "ms.\n";
 
     TablicaDynamiczna<Krawedz> wynikowyPodzbiorKrawedzi = TablicaDynamiczna<Krawedz>();
-    int licznikWyszukan = 0;
     clock_t czasStartuGlownejPetli = clock();
     for (int i = 0; i < graf.pobierzIloscKrawedzi(); i++) {
         int reprezentantWezlaA;
         int reprezentantWezlaB;
         if (pathCompression) {
             reprezentantWezlaA = unionFind.znajdzReprezentantaPathCompression(graf.pobierzKrawedz(i).indeksA);
-            licznikWyszukan++;
             reprezentantWezlaB = unionFind.znajdzReprezentantaPathCompression(graf.pobierzKrawedz(i).indeksB);
-            licznikWyszukan++;
         } else {
             reprezentantWezlaA = unionFind.znajdzReprezentanta(graf.pobierzKrawedz(i).indeksA);
-            licznikWyszukan++;
             reprezentantWezlaB = unionFind.znajdzReprezentanta(graf.pobierzKrawedz(i).indeksB);
-            licznikWyszukan++;
         }
 
         if (reprezentantWezlaA != reprezentantWezlaB) {
@@ -227,7 +226,7 @@ TablicaDynamiczna<Krawedz> algorytmKruskala(Graf graf, bool unionByRank, bool pa
     long czasObliczenGlownejPetli = (czasKoncaGlownejPetli - czasStartuGlownejPetli) / (CLOCKS_PER_SEC / 1000);
     std::cout << "Glowna petla w algorytmie Kruskala zajela: " << czasObliczenGlownejPetli << "ms.\n";
 
-    std::cout << "Liczba wykonan operacji find: " << licznikWyszukan << '\n';
+    std::cout << "Liczba wykonan operacji find: " << unionFind.licznikWyszukan << '\n';
 
     return wynikowyPodzbiorKrawedzi;
 }
@@ -258,15 +257,16 @@ void testLadowaniaGrafuZPliku() {
 
 }
 
-void eksperyment() {
+void eksperyment(bool unionByRank, bool pathCompression) {
     std::string nazwyPlikow[3] = {"g1.txt", "g2.txt", "g3.txt"};
 
-    for (const auto & nazwaPliku : nazwyPlikow) {
+    for (const auto &nazwaPliku: nazwyPlikow) {
         std::cout << "--------------------------------------\nGraf: " << nazwaPliku
+                  << "\nUnionByRank: " << unionByRank << " PathCompression: " << pathCompression << '\n'
                   << "\n--------------------------------------\n";
 
         Graf graf = Graf(nazwaPliku);
-        TablicaDynamiczna<Krawedz> wynik = algorytmKruskala(graf, true, true);
+        TablicaDynamiczna<Krawedz> wynik = algorytmKruskala(graf, unionByRank, pathCompression);
         std::cout << "Liczba krawedzi: " << wynik.pobierzIloscElementow() << '\n';
         float sumaWag = 0.0f;
         for (int j = 0; j < wynik.pobierzIloscElementow(); j++) {
@@ -279,7 +279,10 @@ void eksperyment() {
 }
 
 int main() {
-    eksperyment();
+    eksperyment(false, false);
+    eksperyment(true, false);
+    eksperyment(false, true);
+    eksperyment(true, true);
 //    testMergeSort();
 //    testLadowaniaGrafuZPliku();
 
